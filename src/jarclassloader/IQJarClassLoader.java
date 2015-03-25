@@ -37,6 +37,7 @@ public class IQJarClassLoader extends ClassLoader {
         try {
             return findSystemClass(className);
         } catch (Exception e) {
+        	e.printStackTrace();
         }
 
         try {
@@ -45,11 +46,12 @@ public class IQJarClassLoader extends ClassLoader {
             InputStream is = (InputStream) jar.getInputStream(entry);
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             int nextValue = is.read();
-            while (-1 != nextValue) {
-                byteStream.write(nextValue);
-                nextValue = is.read();
+            byte[] buffer = new byte[4096];
+            int read = 0;
+            while ( (read = is.read(buffer)) != -1 ) {
+            	byteStream.write(buffer, 0, read);
             }
-
+         
             classByte = byteStream.toByteArray();
             result = defineClass(className, classByte, 0, classByte.length, null);
             classes.put(className, result);
