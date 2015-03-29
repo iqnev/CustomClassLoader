@@ -2,13 +2,15 @@ package jarclassloader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class IQJarClassLoader extends ClassLoader {
-	private String jarFile = "/Users/iqnev/Downloads/workspace/jarclassloader/json-simple-1.1.1.jar"; //Path to the jar file
+	private URL jarFile = getClass().getClassLoader().getResource("json-simple-1.1.1.jar");
     private Hashtable classes = new Hashtable(); 
 
     /**
@@ -19,33 +21,39 @@ public class IQJarClassLoader extends ClassLoader {
     }
 
     public Class loadClass(String className) throws ClassNotFoundException {
-        return findClass(className);
+        return findClass(className, true);
     }
     
     /**
      * checking if class of jar file is exist or is load
      * @throws ClassNotFoundException 
      */
-    public Class findClass(String className) throws ClassNotFoundException {
+    public Class findClass(String className, boolean resolveIt) throws ClassNotFoundException {
         byte classByte[];
         Class result = null;
-
+        
+        /* Check our local cache of classes */
         result = (Class) classes.get(className); 
         if (result != null) {
             return result;
         }
-        try {  
-            return findSystemClass(className.replace('/', '.'));  
-        } catch (Exception e) {  
-        	 System.err.println("        >>>>>> Not a system class.");
-        } 
+
         try {
         	
-            JarFile jar = new JarFile(jarFile);
-     
-            JarEntry entry = jar.getJarEntry(className + ".class");
-            if (entry == null) {
-            	 System.err.println(className + ".class");
+            JarFile jar = new JarFile(this.jarFile.getPath().toString());
+            Enumeration<JarEntry> jarIterator = jar.entries();
+            JarEntry entry;
+            // search in jar
+         /*   while (jarIterator.hasMoreElements()) {
+
+             entry = jarIterator.nextElement();
+             System.out.println(entry.getName());
+            
+            } */
+          
+            entry = jar.getJarEntry(className + ".class");
+            if (entry == null) {          	
+            	throw new ClassNotFoundException(className + ".class");
             }
             byte[] buffer = new byte[4096];
             InputStream is = (InputStream) jar.getInputStream(entry);
@@ -58,12 +66,17 @@ public class IQJarClassLoader extends ClassLoader {
             }
          
             classByte = byteStream.toByteArray();
-            System.out.println(classByte.length);
+            
             result = defineClass(className, classByte, 0, classByte.length);
-            if(result == null) {
+            if(result == null) { 
             	 System.err.println(className + ".class");
+            } 
+            
+            if(resolveIt) {
+            	resolveClass(result);
             }
-            classes.put(className, result);
+            
+            classes.put(className, result); 
             return result; 
         } catch (Exception e) {
         	throw new ClassNotFoundException(className, e);
