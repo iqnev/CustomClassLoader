@@ -1,6 +1,7 @@
 package jarclassloader;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.Object;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -51,23 +52,24 @@ public class IQJarClassLoader extends ClassLoader {
             
             } */
           
-            entry = jar.getJarEntry(className + ".class");
+            entry = jar.getJarEntry(className.replace('.', '/') + ".class");
             if (entry == null) {          	
             	throw new ClassNotFoundException(className + ".class");
             }
             byte[] buffer = new byte[4096];
             InputStream is = (InputStream) jar.getInputStream(entry);
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-            int nextValue = is.read();
             
             int read = 0; 
             while ( (read = is.read(buffer)) != -1 ) {
-            	byteStream.write(buffer, 0, read);
+            	if(read > 0) {
+            		byteStream.write(buffer, 0, read);
+            	}
             }
          
             classByte = byteStream.toByteArray();
             
-            result = defineClass(className, classByte, 0, classByte.length);
+            result =   super.defineClass(className, classByte, 0, classByte.length, null);
             if(result == null) { 
             	 System.err.println(className + ".class");
             } 

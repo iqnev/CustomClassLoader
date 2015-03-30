@@ -2,6 +2,7 @@ package jarclassloader;
 
 
 import org.json.simple.JSONArray;
+import java.lang.Object;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -12,7 +13,7 @@ public class TestJarLoader {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, ParseException {
 		 ClassLoader cl = new IQJarClassLoader();
 		
-		 JSONParser parser= (JSONParser) cl.loadClass("org/json/simple/parser/JSONParser").newInstance();
+		 JSONParser parser= (JSONParser) cl.loadClass("org.json.simple.parser.JSONParser").newInstance();
 		 
 		 System.out.println("=======decode=======");
          
