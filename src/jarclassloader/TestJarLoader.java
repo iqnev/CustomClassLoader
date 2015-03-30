@@ -2,7 +2,6 @@ package jarclassloader;
 
 
 import org.json.simple.JSONArray;
-import java.lang.Object;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;

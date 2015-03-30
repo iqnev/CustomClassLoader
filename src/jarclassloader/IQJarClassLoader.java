@@ -1,7 +1,6 @@
 package jarclassloader;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.Object;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -11,7 +10,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class IQJarClassLoader extends ClassLoader {
-	private URL jarFile = getClass().getClassLoader().getResource("json-simple-1.1.1.jar");
+	//private URL jarFile = getClass().getClassLoader().getResource("json-simple-1.1.1.jar");
+	private String jarFile = "/Users/iqnev/Downloads/workspace/jarclassloader/json-simple-1.1.1.jar";
     private Hashtable classes = new Hashtable(); 
 
     /**
@@ -38,20 +38,18 @@ public class IQJarClassLoader extends ClassLoader {
         if (result != null) {
             return result;
         }
-
+        
+        
+       
+        
         try {
         	
-            JarFile jar = new JarFile(this.jarFile.getPath().toString());
+            //JarFile jar = new JarFile(this.jarFile.getPath().toString());
+        	JarFile jar = new JarFile(this.jarFile);
             Enumeration<JarEntry> jarIterator = jar.entries();
             JarEntry entry;
-            // search in jar
-         /*   while (jarIterator.hasMoreElements()) {
-
-             entry = jarIterator.nextElement();
-             System.out.println(entry.getName());
             
-            } */
-          
+            // search in jar
             entry = jar.getJarEntry(className.replace('.', '/') + ".class");
             if (entry == null) {          	
             	throw new ClassNotFoundException(className + ".class");
@@ -68,8 +66,8 @@ public class IQJarClassLoader extends ClassLoader {
             }
          
             classByte = byteStream.toByteArray();
-            
-            result =   super.defineClass(className, classByte, 0, classByte.length, null);
+           
+            result =  super.defineClass(className, classByte, 0, classByte.length, null);
             if(result == null) { 
             	 System.err.println(className + ".class");
             } 
@@ -79,9 +77,12 @@ public class IQJarClassLoader extends ClassLoader {
             }
             
             classes.put(className, result); 
+            
             return result; 
         } catch (Exception e) {
-        	throw new ClassNotFoundException(className, e);
+        	
+        	return super.findSystemClass(className);
+   
         }
 		
     }
